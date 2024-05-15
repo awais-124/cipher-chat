@@ -1,6 +1,6 @@
 creating a repository
 git init
-git remote add origin https://github.com/awais-124/Wallet-App.git
+git remote add origin https://github.com/awais-124/cipher-chat.git
 git add .
 git commit -m "first commit"
 git push -u origin main
