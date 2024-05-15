@@ -1,0 +1,13 @@
+creating a repository
+git init
+git remote add origin https://github.com/awais-124/Wallet-App.git
+git add .
+git commit -m "first commit"
+git push -u origin main
+
+//103.141.159.23
+
+git checkout -b AUTH
+git add .
+git commit -m "asdhgwqSDGB"
+git push -u origin AUTH
