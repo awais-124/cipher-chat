@@ -10,8 +10,10 @@ import {
 import FONTS from '../styles/typography';
 import COLORS from '../styles/colors';
 import FLEX from '../styles/flex';
+import FONTFAMILY from '../styles/fonts';
 
 import {screen_width} from '../utils/Dimensions';
+const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
 
 const SimpleInput = ({placeHolder = '', data, phColor, onChange}) => {
   const inputRef = useRef(null);
@@ -45,5 +47,5 @@ const styles = StyleSheet.create({
     height: 60,
     width: screen_width * 0.872,
   },
-  input: {height: '80%', width: '100%'},
+  input: {height: '80%', width: '100%', ...com.reg.pt14},
 });

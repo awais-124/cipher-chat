@@ -5,19 +5,31 @@ import {StyleSheet, Text, ImageBackground} from 'react-native';
 import CustomStatusBar from '../components/CustomStatusBar';
 import Logo from '../components/Logo';
 
+import StorageService from '../utils/StorageHelper';
+
 import CONSTANTS from '../helpers/CONSTANTS';
+import FONTFAMILY from '../styles/fonts';
 import ASSETS from '../helpers/imports';
 import COLORS from '../styles/colors';
-import FONTS from '../styles/typography';
 import FLEX from '../styles/flex';
 
 import {screen_height} from '../utils/Dimensions';
+const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
+
+import checker from '../../../temp';
 
 const Splash = ({navigation}) => {
-  const navigateToHome = () => navigation.navigate('SignIn');
+  const checkLogin = async () => {
+    checker.doIt();
+    const email = await StorageService.getItem('EMAIL');
+    console.log('EMAIL FROM SPLASH: ', email);
+    await navigation.navigate(
+      `${typeof email === 'string' ? 'Chat' : 'SignIn'}`,
+    );
+  };
 
   useEffect(() => {
-    const timeoutId = setTimeout(navigateToHome, CONSTANTS.SPLASH_TIMEOUT);
+    const timeoutId = setTimeout(checkLogin, CONSTANTS.SPLASH_TIMEOUT);
     return () => clearTimeout(timeoutId);
   }, []);
 
@@ -25,9 +37,8 @@ const Splash = ({navigation}) => {
     <ImageBackground source={ASSETS.SplashBack} style={[FLEX.centeredFill]}>
       <CustomStatusBar />
       <Logo style={FLEX.centeredFill} />
-      <Text style={[FONTS.semibold.pt14, styles.baseText]}>
-        Your best choice for chatting
-      </Text>
+      {/* <Text style={[FONTS.semibold.pt14, styles.baseText]}> */}
+      <Text style={[styles.baseText]}>Your best choice for chatting</Text>
     </ImageBackground>
   );
 };
@@ -36,9 +47,9 @@ export default Splash;
 
 const styles = StyleSheet.create({
   baseText: {
-    fontFamily: 'Comfortaa',
     textAlignVertical: 'bottom',
     color: COLORS.secondary.white,
     marginBottom: screen_height * 0.05,
+    ...com.sb.pt14,
   },
 });

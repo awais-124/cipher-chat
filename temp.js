@@ -1,36 +1,43 @@
-import {ImageBackground, StyleSheet, Text, View} from 'react-native';
+import AES from './src/Security/AES';
+import {
+  rsaDecrypt,
+  rsaEncrypt,
+  generateKeyPair,
+} from './src/Security/hybrid-rsa';
 
-import {useEffect} from 'react';
+const doIt = async () => {
+  try {
+    const keys = await generateKeyPair();
+    console.log('STARTED');
+    const PB = keys.publicKey;
+    const PK = keys.privateKey;
 
-import ASSETS from '../helpers/imports';
-import FLEX from '../styles/flex';
-import COLORS from '../styles/colors';
-import CONSTANTS from '../helpers/CONSTANTS';
+    console.log(
+      '...................FROM CHECK : ENCRYPION STARTS.................. : ',
+    );
 
-import {screen_height} from '../utils/Dimensions';
+    const AESKey = AES.generateKey();
+    console.log('FROM CHECK : AES KEY : ', AESKey);
+    const message =
+      'My name is Muhammad Awais My name is Muhammad Awais My name is Muhammad Awais';
+    console.log('FROM CHECK :  MESSAGE : ', message);
+    const ciphertext = AES.encrypt(message, AESKey);
+    console.log('FROM CHECK : CIPHER TEXT : ', ciphertext);
 
-const Splash = ({navigation}) => {
-  // const navigateToHome = () => navigation.replace('SignIn');
+    const AESCipher = await rsaEncrypt(PB, AESKey);
+    console.log('FROM CHECK : ENCRYPTED AES KEY : ', AESCipher);
 
-  // useEffect(() => {
-  //   const timeoutId = setTimeout(navigateToHome, CONSTANTS.SPLASH_TIMEOUT);
-  //   return () => clearTimeout(timeoutId);
-  // }, []);
-  return (
-    <ImageBackground source={ASSETS.SplashBack} style={FLEX.centeredFill}>
-      <View>
-        <Text>Splash</Text>
-      </View>
-    </ImageBackground>
-  );
+    console.log(
+      '...................FROM CHECK : DECRYPION STARTS.................. : ',
+    );
+    const AESClear = await rsaDecrypt(PK, AESCipher);
+    console.log('FROM CHECK : DECRYPTED AES KEY : ', AESClear);
+    const clearText = AES.decrypt(ciphertext, AESClear);
+    console.log('FROM CHECK : DECRYPTED MESSAGE : ', clearText);
+  } catch (error) {
+    console.log('ERROR FROM CHECK : ', error);
+  }
 };
+const checker = {doIt};
 
-export default Splash;
-
-const styles = StyleSheet.create({
-  baseText: {
-    textAlignVertical: 'bottom',
-    color: COLORS.secondary.white,
-    marginBottom: screen_height * 0.05,
-  },
-});
+export default checker;

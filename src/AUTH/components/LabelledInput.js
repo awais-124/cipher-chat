@@ -13,8 +13,10 @@ import FONTS from '../styles/typography';
 import COLORS from '../styles/colors';
 import ICONS from '../helpers/icons';
 import FLEX from '../styles/flex';
+import FONTFAMILY from '../styles/fonts';
 
 import {screen_width} from '../utils/Dimensions';
+const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
 
 const LabelledInput = ({
   labelColor = '#000',
@@ -34,14 +36,12 @@ const LabelledInput = ({
     <TouchableWithoutFeedback onPress={handlePress}>
       <View style={[FLEX.row, styles.container]}>
         <View style={[FLEX.col, styles.inputBox]}>
-          <Text
-            style={[FONTS.regular.pt12, {color: labelColor, ...styles.label}]}>
-            {label}
-          </Text>
+          <Text style={{color: labelColor, ...styles.label}}>{label}</Text>
           <TextInput
             ref={inputRef}
             secureTextEntry={showPassword}
-            style={[FONTS.semibold.pt14, styles.input]}
+            // style={[FONTS.semibold.pt14, styles.input]}
+            style={styles.input}
             maxLength={isPassword ? 20 : 50}
             value={data}
             onChangeText={onChange}
@@ -79,6 +79,12 @@ const styles = StyleSheet.create({
   label: {
     margin: 0,
     color: COLORS.secondary.black,
+    ...mon.sb.pt12,
   },
-  input: {height: '80%', width: '100%',color:COLORS.secondary.black},
+  input: {
+    height: '80%',
+    width: '100%',
+    color: COLORS.secondary.black,
+    ...com.reg.pt14,
+  },
 });

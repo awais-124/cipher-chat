@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {
   ImageBackground,
   TouchableOpacity,
@@ -7,37 +7,49 @@ import {
   Text,
   View,
   Alert,
-  KeyboardAvoidingView,
+  Keyboard,
 } from 'react-native';
 
 import DatePicker from 'react-native-date-picker';
+import firestore from '@react-native-firebase/firestore';
+import uuid from 'react-native-uuid';
 
 import FLEX from '../styles/flex';
 import COLORS from '../styles/colors';
-import FONTS from '../styles/typography';
 import ASSETS from '../helpers/imports';
+import FONTFAMILY from '../styles/fonts';
 import HANDLERS from '../helpers/handlers';
 
 import CustomStatusBar from '../components/CustomStatusBar';
 import ScreenWrapper from '../components/ScreenWrapper';
 import LabelledInput from '../components/LabelledInput';
-import BtnSimple from '../components/BtnSimple';
 import DateInput from '../components/DateInput';
+import BtnSimple from '../components/BtnSimple';
+import Loader from '../components/Loader';
 import Logo from '../components/Logo';
 
+import {generateKeyPair} from '../../Security/hybrid-rsa';
 import {screen_width} from '../utils/Dimensions';
 
+const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
+const {secondary: s, primary: p} = COLORS;
+
 const SignUp = ({navigation}) => {
-  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('Ali');
+  const [email, setEmail] = useState('alimalik@gmail.com');
+  const [phone, setPhone] = useState('03269872800');
+  const [pass, setPass] = useState('221094');
+  const [confirmPass, setConfirmPass] = useState('221094');
+
   const [date, setDate] = useState(null);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [pass, setPass] = useState('');
+  const [open, setOpen] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const [visible, setVisible] = useState(false);
 
   const handleEmail = val => setEmail(val);
   const handleName = val => setName(val);
   const handlePass = val => setPass(val);
+  const handleConfirmPass = val => setConfirmPass(val);
   const handlePhone = val => setPhone(val);
   const handleDatePicker = () => setOpen(true);
 
@@ -48,49 +60,119 @@ const SignUp = ({navigation}) => {
   };
 
   const clearInputs = () => {
-    setDate(null);
+    setDate('');
     setEmail('');
     setName('');
     setPass('');
+    setConfirmPass('');
     setPhone('');
   };
 
-  const goToSignIn = () => {
+  const goToSignIn = async () => {
     clearInputs();
-    navigation.navigate('SignIn');
+    await navigation.navigate('SignIn');
   };
 
-  const handleFormSubmission = () => {
-    const {message, isValid} = HANDLERS.handleFormValidity(
+  const handleFormSubmission = async () => {
+    setVisible(true);
+    const {message, isValid} = await HANDLERS.handleFormValidity(
       email,
       pass,
+      confirmPass,
       phone,
       name,
       date,
     );
+
     if (isValid) {
-      clearInputs();
-      goToSignIn();
+      try {
+        const querySnapshot = await firestore()
+          .collection('users')
+          .where('email', '==', email)
+          .get();
+        console.log('EMAIL QUERY', querySnapshot);
+        let errorMessage = 'User already Exists with provided email!';
+        let alreadyExists = false;
+
+        if (!querySnapshot.empty) alreadyExists = true;
+
+        if (!alreadyExists) {
+          const phoneQuery = await firestore()
+            .collection('users')
+            .where('phone', '==', phone)
+            .get();
+          if (!phoneQuery.empty) {
+            alreadyExists = true;
+            errorMessage = 'User already Exists with provided phone number!';
+          }
+        }
+        const {publicKey, privateKey} = await generateKeyPair();
+        console.log({publicKey}, {privateKey});
+        if (!alreadyExists) {
+          const userId = uuid.v4();
+          console.log(userId);
+          await firestore().collection('users').doc(userId).set({
+            userId,
+            email,
+            password: pass,
+            phone,
+            name,
+            date,
+            privateKey,
+            publicKey,
+          });
+          setVisible(false);
+          Alert.alert('Success', 'Sign Up successful!', [
+            {
+              text: 'Login',
+              onPress: () => goToSignIn(),
+            },
+          ]);
+        } else {
+          setVisible(false);
+          Alert.alert('Error', errorMessage);
+        }
+      } catch (error) {
+        setVisible(false);
+        console.log('ERROR FROM SIGNUP ', error);
+        Alert.alert('Error', 'Something Went wrong!.');
+      }
     } else {
+      setVisible(false);
       Alert.alert('Error', message);
     }
   };
 
-  const {primary: p, secondary: s} = COLORS;
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+      setIsFocused(true);
+    });
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+      setIsFocused(false);
+    });
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   return (
     <ScreenWrapper>
       <ImageBackground
         source={ASSETS.SignUpBack}
         style={[FLEX.fill, styles.container]}>
-        <KeyboardAvoidingView style={[FLEX.fill, styles.container]}>
+        <View style={[FLEX.fill, styles.container]}>
+          {visible && <Loader />}
           <CustomStatusBar />
-          <View style={styles.header}>
-            <Logo style={{zIndex: 999}} />
-          </View>
+          {!isFocused && (
+            <View style={styles.header}>
+              <Logo style={[styles.logo]} />
+            </View>
+          )}
           <ScrollView style={styles.form}>
             <View style={[FLEX.justifyCentered, styles.formBody]}>
-              <Text style={[FONTS.bold.pt24, styles.formH1]}>Sign Up</Text>
+              <Text style={styles.formH1}>Sign Up</Text>
               <LabelledInput label="Name" data={name} onChange={handleName} />
               <LabelledInput
                 label="Phone Number"
@@ -107,6 +189,11 @@ const SignUp = ({navigation}) => {
                 data={pass}
                 onChange={handlePass}
               />
+              <LabelledInput
+                label="Confirm Password"
+                data={confirmPass}
+                onChange={handleConfirmPass}
+              />
               <DateInput
                 label="Birthday"
                 onClick={handleDatePicker}
@@ -121,8 +208,10 @@ const SignUp = ({navigation}) => {
                 mode="date"
                 onConfirm={onConfirmDate}
                 onCancel={onCancelDate}
-                theme="auto"
+                theme="dark"
                 textColor={s.black}
+                buttonColor={p.orange}
+                title="Pick Date"
               />
               <BtnSimple
                 text="Sign Up"
@@ -133,14 +222,12 @@ const SignUp = ({navigation}) => {
               <View style={styles.footer}>
                 <Text style={styles.footerText}>Already have an account?</Text>
                 <TouchableOpacity onPress={goToSignIn}>
-                  <Text style={[FONTS.semibold.pt16, {color: p.orange}]}>
-                    Sign In
-                  </Text>
+                  <Text style={styles.pressable}>Sign In</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </ScrollView>
-        </KeyboardAvoidingView>
+        </View>
       </ImageBackground>
     </ScreenWrapper>
   );
@@ -151,22 +238,30 @@ export default SignUp;
 const styles = StyleSheet.create({
   container: {justifyContent: 'space-evenly', alignItems: 'center'},
   header: {
-    flex: 0.4,
+    flex: 0.45,
     paddingTop: 3,
     width: screen_width,
     justifyContent: 'flex-start',
     alignItems: 'center',
   },
+  logo: {marginTop: 30, zIndex: 999},
   form: {
-    flex: 0.6,
+    flex: 0.55,
     width: screen_width,
     paddingHorizontal: 20,
     backgroundColor: COLORS.secondary.white,
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
   },
-  formBody: {gap: 15, paddingVertical: 50},
-  formH1: {color: COLORS.secondary.black, alignSelf: 'flex-start'},
+  formBody: {gap: 15, paddingBottom: 50, paddingTop: 40},
+  formH1: {
+    color: COLORS.secondary.black,
+    alignSelf: 'flex-start',
+    textTransform: 'uppercase',
+    ...mon.b.pt24,
+    marginVertical: 8,
+  },
   footer: {flexDirection: 'row', justifyContent: 'space-between', gap: 5},
-  footerText: {color: COLORS.secondary.black},
+  footerText: {color: COLORS.secondary.black, ...mon.reg.pt14},
+  pressable: {...mon.sb.pt16, color: p.orange},
 });

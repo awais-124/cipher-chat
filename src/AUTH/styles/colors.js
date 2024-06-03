@@ -30,6 +30,14 @@ const COLORS = {
     lightGreen: '#17D85C',
     lightOrange: '#FF9900',
   },
+  chat: {
+    back: '#FFF',
+    right: '#640D6B',
+    left: '#DDD',
+  },
 };
+/*ge (#F5F5DC)
+Sender Message Bubble: Light Coral (#FFCDD2)
+Receiver Message Bubble: White (#FFFFFF) */
 
 export default COLORS;

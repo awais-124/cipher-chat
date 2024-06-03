@@ -1,7 +1,7 @@
 import EYE_SHOW from '../../assets/Icon/Eye-Show.png';
 import EYE_HIDE from '../../assets/Icon/Eye-Hide.png';
 import ARROW_LEFT from '../../assets/Icon/Left.png';
-import LOCK from '../../assets/Icon/round-lock.png';
+import LOCK from '../../assets/Icon/Lock.png';
 import DELETE from '../../assets/Icon/Delete.png';
 import IMPORTANT from '../../assets/Icon/Important.png';
 import MESSAGE_BOX from '../../assets/Icon/Message-Box.png';
@@ -35,10 +35,16 @@ import SHOP from '../../assets/Icon/Shop.png';
 import CHART from '../../assets/Icon/Chart.png';
 import LOGOUT from '../../assets/Icon/Logout.png';
 import RIGHT from '../../assets/Icon/Right.png';
+import AVATAR from '../../assets/Icon/profile1.png';
+import CONTACTUS from '../../assets/Icon/Contact_us.png';
+import BILL from '../../assets/Icon/Bill.png';
 
 const ICONS = {
-  RIGHT,
+  BILL,
+  CONTACTUS,
   LOGOUT,
+  AVATAR,
+  RIGHT,
   CHART,
   SHOP,
   PRODUCT,

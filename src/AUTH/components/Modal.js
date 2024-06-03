@@ -4,16 +4,18 @@ import ASSETS from '../helpers/imports';
 import COLORS from '../styles/colors';
 import FLEX from '../styles/flex';
 import FONTS from '../styles/typography';
+import FONTFAMILY from '../styles/fonts';
 
 import BtnSmall from './BtnSmall';
 
 import {screen_height, screen_width} from '../utils/Dimensions';
+const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
 
-const Modal = ({style, onPress, message, title = 'OK', color = '#000'}) => {
+const Modal = ({style, onPress, message, title = 'OK', color = '#fff'}) => {
   return (
     <View style={[FLEX.justifyCenteredFill, styles.container, style]}>
       <Image source={ASSETS.Check} style={styles.icon} />
-      <Text style={[FONTS.regular.pt14, styles.text]}>{message}</Text>
+      <Text style={styles.text}>{message}</Text>
       <BtnSmall
         text={title}
         back={COLORS.primary.orange}
@@ -44,6 +46,7 @@ const styles = StyleSheet.create({
   text: {
     textAlign: 'center',
     color: COLORS.secondary.black,
+    ...mon.reg.pt14,
     lineHeight: 20,
   },
 });

@@ -8,11 +8,13 @@ import {
 } from 'react-native';
 
 import {screen_width} from '../utils/Dimensions';
+const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
 
 import FONTS from '../styles/typography';
 import COLORS from '../styles/colors';
 import ICONS from '../helpers/icons';
 import FLEX from '../styles/flex';
+import FONTFAMILY from '../styles/fonts';
 
 const DateInput = ({
   labelColor,
@@ -26,10 +28,7 @@ const DateInput = ({
     <TouchableOpacity onPress={onClick} activeOpacity={0.6}>
       <View style={[FLEX.row, styles.container]}>
         <View style={[FLEX.col, styles.inputBox]}>
-          <Text
-            style={[FONTS.regular.pt12, {color: labelColor, ...styles.label}]}>
-            {label}
-          </Text>
+          <Text style={{color: labelColor, ...styles.label}}>{label}</Text>
           <TextInput
             style={[FONTS.semibold.pt14, styles.input]}
             value={data}
@@ -64,6 +63,7 @@ const styles = StyleSheet.create({
   label: {
     margin: 0,
     color: COLORS.secondary.black,
+    ...mon.sb.pt12,
   },
   input: {height: '80%', maxWidth: 'auto', color: COLORS.secondary.black},
 });

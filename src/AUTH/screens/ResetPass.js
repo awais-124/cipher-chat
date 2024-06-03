@@ -16,12 +16,13 @@ import LabelledInput from '../components/LabelledInput';
 import CustomStatusBar from '../components/CustomStatusBar';
 
 import CONSTANTS from '../helpers/CONSTANTS';
+import FONTFAMILY from '../styles/fonts';
 import ICONS from '../helpers/icons';
-import FONTS from '../styles/typography';
 import COLORS from '../styles/colors';
 import FLEX from '../styles/flex';
 
 import {screen_height} from '../utils/Dimensions';
+const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
 
 const ResetPass = ({navigation}) => {
   const scrollViewRef = useRef(null);
@@ -76,12 +77,8 @@ const ResetPass = ({navigation}) => {
         <View style={styles.body}>
           <Image source={ICONS.MESSAGE_BOX} />
           <View style={styles.textBox}>
-            <Text style={[FONTS.medium.pt20, styles.black]}>
-              Reset Password
-            </Text>
-            <Text style={[FONTS.regular.pt14, styles.black]}>
-              Create Your New Password
-            </Text>
+            <Text style={[styles.black]}>Reset Password</Text>
+            <Text style={[styles.blackTwo]}>Create Your New Password</Text>
           </View>
           <View style={styles.inputs}>
             <LabelledInput
@@ -136,7 +133,12 @@ const styles = StyleSheet.create({
   },
   textBox: {gap: 8},
   inputs: {gap: 10},
-  black: {color: COLORS.secondary.black, textAlign: 'center'},
+  black: {color: COLORS.secondary.black, textAlign: 'center', ...mon.reg.pt20},
+  blackTwo: {
+    color: COLORS.secondary.black,
+    textAlign: 'center',
+    ...mon.reg.pt16,
+  },
   footer: {justifyContent: 'flex-end', marginTop: 5},
   modal: {position: 'absolute', top: screen_height * 0.32},
 });

@@ -11,14 +11,22 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^1.23.1",
+    "@react-native-firebase/app": "^20.0.0",
+    "@react-native-firebase/firestore": "^20.0.0",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
+    "hybrid-crypto-js": "^0.2.4",
     "react": "18.2.0",
     "react-native": "0.73.4",
     "react-native-asset": "^2.1.1",
+    "react-native-crypto-js": "^1.0.0",
     "react-native-date-picker": "^5.0.2",
+    "react-native-gifted-chat": "^2.4.0",
+    "react-native-rsa-native": "^2.0.5",
     "react-native-safe-area-context": "^4.10.1",
-    "react-native-screens": "^3.31.1"
+    "react-native-screens": "^3.31.1",
+    "react-native-uuid": "^2.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
