@@ -1,6 +1,6 @@
 import RSA from 'react-native-rsa-native';
 
-const KEY_SIZE = 2046;
+const KEY_SIZE = 1024;
 
 async function generateKeyPair() {
   try {
@@ -15,23 +15,27 @@ async function generateKeyPair() {
   }
 }
 
-async function encryptMessage(key, message) {
+async function encryptMessage(publicKeys, message) {
   try {
-    console.log(
-      'PLAIN TEXT IN RSA | TYPE | LENGTH | KEY | KEY-LENGTH: ',
-      message,
-      '  |  ',
-      typeof message,
-      '  |  ',
-      message.length,
-      '  |  ',
-      typeof key,
-      '  |  ',
-      key,
-      '  |  ',
-      key.length,
+    // console.log(
+    //   'PLAIN TEXT IN RSA | TYPE | LENGTH | KEY | KEY-LENGTH: ',
+    //   message,
+    //   '  |  ',
+    //   typeof message,
+    //   '  |  ',
+    //   message.length,
+    //   '  |  ',
+    //   typeof key,
+    //   '  |  ',
+    //   key,
+    //   '  |  ',
+    //   key.length,
+    // );
+    const encryptedMessage = await Promise.all(
+      publicKeys.map(publicKey => {
+        return RSA.encrypt(message, publicKey);
+      }),
     );
-    const encryptedMessage = await RSA.encrypt(message, key);
     return encryptedMessage;
   } catch (error) {
     console.log('RSA ENCRYPTION FALIED: ', error);
@@ -39,30 +43,35 @@ async function encryptMessage(key, message) {
   }
 }
 
-async function decryptMessage(key, message) {
-  try {
-    console.log(
-      'CIPHER TEXT IN RSA | TYPE | LENGTH | KEY | KEY-LENGTH: ',
-      message,
-      '  |  ',
-      typeof message,
-      '  |  ',
-      message.length,
-      '  |  ',
-      typeof key,
-      '  |  ',
-      key,
-      '  |  ',
-      key.length,
-    );
-    const decryptedMessage = await RSA.decrypt(message, key);
-    console.log({decryptedMessage});
-    return decryptedMessage;
-  } catch (error) {
-    console.log('RSA DECRYPTION FALIED: ', error.message);
-    return false;
+async function decryptMessage(privateKey, messages) {
+  console.log(
+    'CIPHER TEXT IN RSA | TYPE | LENGTH | KEY | KEY-LENGTH: ',
+    messages[0],
+    '  |  ',
+    typeof messages[0],
+    '  |  ',
+    messages[0].length,
+    '  |  ',
+    typeof privateKey,
+    '  |  ',
+    privateKey,
+    '  |  ',
+    privateKey.length,
+  );
+  for (const msg of messages) {
+    try {
+      const decryptedMessage = await RSA.decrypt(msg, privateKey);
+      if (decryptedMessage !== '') {
+        return decryptedMessage;
+      }
+    } catch (error) {
+      console.log('RSA DECRYPTION ERROR : ', {error});
+    }
   }
+  return false;
 }
+
+
 
 const algoRSA = {generateKeyPair, encryptMessage, decryptMessage};
 

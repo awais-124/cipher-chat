@@ -25,10 +25,14 @@ const Profile = () => {
   const goToSecurityKeysScreen = () => navigation.navigate('SecurityKeys');
 
   function convertTimestampToDate(timestamp) {
-    const date = new Date(
-      timestamp.seconds * 1000 + Math.floor(timestamp.nanoseconds / 1000000),
-    );
-    return date.toDateString();
+    try {
+      const date = new Date(
+        timestamp.seconds * 1000 + Math.floor(timestamp.nanoseconds / 1000000),
+      );
+      return date.toDateString();
+    } catch (error) {
+      return new Date().toDateString();
+    }
   }
 
   useEffect(() => {

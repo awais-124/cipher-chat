@@ -16,11 +16,9 @@ import FLEX from '../styles/flex';
 import {screen_height} from '../utils/Dimensions';
 const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
 
-import checker from '../../../temp';
 
 const Splash = ({navigation}) => {
   const checkLogin = async () => {
-    checker.doIt();
     const email = await StorageService.getItem('EMAIL');
     console.log('EMAIL FROM SPLASH: ', email);
     await navigation.navigate(

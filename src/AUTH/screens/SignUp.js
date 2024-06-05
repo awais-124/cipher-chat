@@ -29,6 +29,7 @@ import Loader from '../components/Loader';
 import Logo from '../components/Logo';
 
 import {generateKeyPair} from '../../Security/hybrid-rsa';
+import algoRSA from '../../Security/RSA';
 import {screen_width} from '../utils/Dimensions';
 
 const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
@@ -106,7 +107,7 @@ const SignUp = ({navigation}) => {
             errorMessage = 'User already Exists with provided phone number!';
           }
         }
-        const {publicKey, privateKey} = await generateKeyPair();
+        const {publicKey, privateKey} = await algoRSA.generateKeyPair();
         console.log({publicKey}, {privateKey});
         if (!alreadyExists) {
           const userId = uuid.v4();

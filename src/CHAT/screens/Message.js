@@ -1,6 +1,12 @@
 import {useState, useEffect, useCallback} from 'react';
 
-import {StyleSheet, View, StatusBar, Alert} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  StatusBar,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 
 import {GiftedChat, Bubble} from 'react-native-gifted-chat';
 import {useRoute} from '@react-navigation/native';
@@ -11,15 +17,17 @@ import Header from '../components/Header';
 import FONTFAMILY from '../../AUTH/styles/fonts';
 import COLORS from '../../AUTH/styles/colors';
 
+import algoRSA from '../../Security/RSA';
 import AES from '../../Security/AES';
-import {rsaEncrypt, rsaDecrypt} from '../../Security/hybrid-rsa';
-import {screen_width} from '../../AUTH/utils/Dimensions';
+
 import StorageService from '../../AUTH/utils/StorageHelper';
+import {screen_height, screen_width} from '../../AUTH/utils/Dimensions';
 
 const Message = ({navigation}) => {
   const [messages, setMessages] = useState([]);
   const [privateKey, setPrivateKey] = useState('');
   const [senderPublicKey, setSenderPublicKey] = useState('');
+  const [loading, setLoading] = useState(false); // Loading state to handle UI while decrypting
 
   const route = useRoute();
   const senderId = route.params?.id;
@@ -45,11 +53,9 @@ const Message = ({navigation}) => {
   const sender = `${senderId}_${receiverId}`;
   const receiver = `${receiverId}_${senderId}`;
 
-  const goToPreviousScreen = () => navigation.goBack();
-  const goToContactScreen = () => navigation.navigate('Contact');
-
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       const subscriber = firestore()
         .collection('chats')
         .doc(sender)
@@ -57,34 +63,55 @@ const Message = ({navigation}) => {
         .orderBy('createdAt', 'desc');
 
       const unsubscribe = subscriber.onSnapshot(async querySnapshot => {
+        const messageMap = new Map(messages.map(msg => [msg._id, msg])); // Use Map to track unique messages
         const newMessagesPromises = querySnapshot.docs.map(async doc => {
-          const firebaseData = doc.data();
-          const encryptedAESKey = firebaseData.metadata.key;
+          if (!messageMap.has(doc.id)) {
+            const firebaseData = doc.data();
+            const encryptedAESKeys = firebaseData.metadata.key;
 
-          try {
-            const aesKey = await rsaDecrypt(privateKey, encryptedAESKey);
-            const clearText = AES.decrypt(firebaseData.text, aesKey);
+            try {
+              const aesKey = await algoRSA.decryptMessage(
+                privateKey,
+                encryptedAESKeys,
+              );
+              if (!aesKey) throw new Error('AES KEY NOT DECRYPTED');
 
-            return {
-              _id: doc.id,
-              text: clearText,
-              createdAt: firebaseData.createdAt.toDate(),
-              user: firebaseData.user,
-            };
-          } catch (error) {
-            Alert.alert('Decryption Error', error.message);
-            return null;
+              const clearText = AES.decrypt(firebaseData.text, aesKey);
+
+              const newMessage = {
+                _id: doc.id,
+                text: clearText,
+                createdAt: firebaseData.createdAt.toDate(),
+                user: firebaseData.user,
+              };
+
+              messageMap.set(newMessage._id, newMessage);
+            } catch (error) {
+              console.error('Decryption Error', error);
+
+              const newMessage = {
+                _id: doc.id,
+                text: 'Decryption Error',
+                createdAt: firebaseData.createdAt.toDate(),
+                user: firebaseData.user,
+              };
+
+              messageMap.set(newMessage._id, newMessage);
+            }
           }
         });
 
-        const newMessages = await Promise.all(newMessagesPromises);
-        setMessages(newMessages.filter(msg => msg !== null));
+        await Promise.all(newMessagesPromises);
+        setMessages(Array.from(messageMap.values()));
+        setLoading(false);
       });
 
       return unsubscribe;
     };
 
-    fetchData();
+    if (privateKey) {
+      fetchData();
+    }
   }, [senderId, receiverId, privateKey]);
 
   const onSend = useCallback(
@@ -94,7 +121,7 @@ const Message = ({navigation}) => {
       const encryptedMessage = AES.encrypt(message.text, aesKey);
       const keys = await StorageService.getItem('KEYS');
       const parsedKeys = JSON.parse(keys);
-      const encryptedAESKey = await rsaEncrypt(
+      const encryptedAESKeys = await algoRSA.encryptMessage(
         [publicKey, parsedKeys.public],
         aesKey,
       );
@@ -103,12 +130,8 @@ const Message = ({navigation}) => {
         _id: message._id,
         text: encryptedMessage,
         createdAt: new Date(),
-        user: {
-          _id: senderId,
-        },
-        metadata: {
-          key: encryptedAESKey,
-        },
+        user: {_id: senderId},
+        metadata: {key: encryptedAESKeys},
       };
 
       try {
@@ -127,7 +150,7 @@ const Message = ({navigation}) => {
         console.log('ON SEND: ', error);
       }
     },
-    [senderId, receiverId],
+    [senderId, receiverId, publicKey],
   );
 
   return (
@@ -138,23 +161,27 @@ const Message = ({navigation}) => {
       />
       <Header
         name={receiverName}
-        goBack={goToPreviousScreen}
-        goToContact={goToContactScreen}
+        goBack={navigation.goBack}
+        goToContact={() => navigation.navigate('Contact')}
       />
-      <GiftedChat
-        messages={messages}
-        onSend={messages => onSend(messages)}
-        user={{
-          _id: senderId,
-        }}
-        renderBubble={props => (
-          <Bubble
-            {...props}
-            wrapperStyle={styles.bubbleWrapper}
-            containerStyle={styles.bubbleContainer}
-          />
-        )}
-      />
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary.blue} />
+        </View>
+      ) : (
+        <GiftedChat
+          messages={messages}
+          onSend={messages => onSend(messages)}
+          user={{_id: senderId}}
+          renderBubble={props => (
+            <Bubble
+              {...props}
+              wrapperStyle={styles.bubbleWrapper}
+              containerStyle={styles.bubbleContainer}
+            />
+          )}
+        />
+      )}
     </View>
   );
 };
@@ -205,5 +232,11 @@ const styles = StyleSheet.create({
   bubbleContainer: {
     left: {maxWidth: '80%', marginLeft: -45},
     right: {maxWidth: '80%'},
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: screen_height * 0.8,
+    width: screen_width,
   },
 });
