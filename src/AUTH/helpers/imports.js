@@ -11,8 +11,10 @@ import Check from '../../assets/Images/check.png';
 import CIPHERWHITE from '../../assets/Logos/white-logo.png';
 import CIPHERBLACK from '../../assets/Logos/black-logo.png';
 import NOTEXTLOGO from '../../assets/Logos/logo-notext.png';
+import DANGER_BACK from '../../assets/BackgroundImages/backkk.jpg';
 
 const ASSETS = {
+  DANGER_BACK,
   MessageBack,
   CIPHERBLACK,
   CIPHERWHITE,

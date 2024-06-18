@@ -8,14 +8,13 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 
+import ASSETS from '../../AUTH/helpers/imports';
 import COLORS from '../../AUTH/styles/colors';
 import FONTFAMILY from '../../AUTH/styles/fonts';
 
 import StorageService from '../../AUTH/utils/StorageHelper';
 
 import {screen_width, screen_height} from '../../AUTH/utils/Dimensions';
-import ASSETS from '../../AUTH/helpers/imports';
-import CustomStatusBar from '../../AUTH/components/CustomStatusBar';
 
 const SecurityKeys = () => {
   const [PBK, setPBK] = useState('');
@@ -37,7 +36,7 @@ const SecurityKeys = () => {
   }, []);
 
   return (
-    <ImageBackground source={ASSETS.KeysBack} style={styles.container}>
+    <ImageBackground source={ASSETS.WALLPAPER} style={styles.container}>
       <StatusBar backgroundColor="#000" barStyle="light-content" />
       <View style={styles.main}>
         <Text style={styles.mainHeading}>{'⚠  confidential  ⚠'}</Text>
@@ -70,8 +69,8 @@ const styles = StyleSheet.create({
   },
   main: {
     flex: 1,
-    backgroundColor: COLORS.secondary.black,
-    opacity: 0.5,
+    backgroundColor: 'transparent',
+    // opacity: 0.5,
     alignItems: 'center',
     justifyContent: 'center',
   },

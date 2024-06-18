@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react';
 
 import {ImageBackground, ScrollView, StyleSheet, View} from 'react-native';
 
+import uuid from 'react-native-uuid';
 import {useNavigation} from '@react-navigation/native';
 
 import StorageService from '../../AUTH/utils/StorageHelper';
@@ -21,6 +22,7 @@ const Profile = () => {
   const [email, setEmail] = useState('YOUR EMAIL');
   const [dob, setDob] = useState('YOUR D.O.B');
   const [phone, setPhone] = useState('...Phone no...');
+  const [userId, setUserId] = useState(`${uuid.v4()}`);
 
   const goToSecurityKeysScreen = () => navigation.navigate('SecurityKeys');
 
@@ -43,6 +45,8 @@ const Profile = () => {
       setEmail(tempEmail);
       const tempPhone = await StorageService.getItem('PHONE');
       setPhone(tempPhone);
+      const tempId = await StorageService.getItem('USERID');
+      setUserId(tempId);
       const tempDate = await StorageService.getItem('DOB');
       const date = JSON.parse(tempDate);
       setDob(convertTimestampToDate(date));
@@ -57,6 +61,10 @@ const Profile = () => {
       dob,
     };
     navigation.navigate('Update', {data: info});
+  };
+
+  const goToUsersScreen = () => {
+    navigation.navigate('Users', {id: userId});
   };
 
   const handleLogout = async () => {
@@ -75,7 +83,11 @@ const Profile = () => {
             icon={ICONS.BILL}
             onClick={goToUpdateScreen}
           />
-          <Cards label="Perform Encryption" icon={ICONS.LOCK} />
+          <Cards
+            label="Perform Encryption"
+            icon={ICONS.LOCK}
+            onClick={goToUsersScreen}
+          />
           <Cards
             label="Security Keys"
             icon={ICONS.LOCK}

@@ -12,6 +12,9 @@ import Chat from '../CHAT/screens/Chat';
 import Contact from '../CHAT/screens/Contact';
 import SecurityKeys from '../CHAT/screens/SecurityKeys';
 import Update from '../CHAT/screens/Update';
+import Users from '../CHAT/screens/Users';
+import Encryption from '../CHAT/screens/Encryption';
+import SendMessage from '../CHAT/screens/SendMessage';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +34,9 @@ export default function AppNavigator() {
         <Stack.Screen name="Contact" component={Contact} />
         <Stack.Screen name="SecurityKeys" component={SecurityKeys} />
         <Stack.Screen name="Update" component={Update} />
+        <Stack.Screen name="Users" component={Users} />
+        <Stack.Screen name="Encryption" component={Encryption} />
+        <Stack.Screen name="SendMessage" component={SendMessage} />
       </Stack.Navigator>
     </NavigationContainer>
   );

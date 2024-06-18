@@ -38,8 +38,10 @@ import RIGHT from '../../assets/Icon/Right.png';
 import AVATAR from '../../assets/Icon/profile1.png';
 import CONTACTUS from '../../assets/Icon/Contact_us.png';
 import BILL from '../../assets/Icon/Bill.png';
+import PLUS from '../../assets/Icon/Plus.png';
 
 const ICONS = {
+  PLUS,
   BILL,
   CONTACTUS,
   LOGOUT,

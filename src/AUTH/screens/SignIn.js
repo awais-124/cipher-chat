@@ -26,8 +26,9 @@ import FONTS from '../styles/typography';
 import CONSTANTS from '../helpers/CONSTANTS';
 import StorageService from '../utils/StorageHelper';
 
-import {screen_height, screen_width} from '../utils/Dimensions';
+import SHA from '../../Security/SHA';
 
+import {screen_height, screen_width} from '../utils/Dimensions';
 const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
 const {primary: p, secondary: s} = COLORS;
 
@@ -72,7 +73,11 @@ const Home = ({navigation}) => {
         console.log('FETCHED DATA');
         setVisible(false);
         const fetchedData = querySnapshot.docs[0].data();
-        if (fetchedData.password == password) {
+        const hashMatches = await SHA.matchHash(
+          password + fetchedData.userId,
+          fetchedData.password,
+        );
+        if (hashMatches) {
           gotoNext(
             fetchedData.name,
             fetchedData.email,

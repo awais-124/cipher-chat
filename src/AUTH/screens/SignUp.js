@@ -28,8 +28,9 @@ import BtnSimple from '../components/BtnSimple';
 import Loader from '../components/Loader';
 import Logo from '../components/Logo';
 
-import {generateKeyPair} from '../../Security/hybrid-rsa';
 import algoRSA from '../../Security/RSA';
+import SHA from '../../Security/SHA';
+
 import {screen_width} from '../utils/Dimensions';
 
 const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
@@ -112,10 +113,12 @@ const SignUp = ({navigation}) => {
         if (!alreadyExists) {
           const userId = uuid.v4();
           console.log(userId);
+          const passwordHash = await SHA.generateHash(pass + userId);
+          console.log({passwordHash});
           await firestore().collection('users').doc(userId).set({
             userId,
             email,
-            password: pass,
+            password: passwordHash,
             phone,
             name,
             date,
