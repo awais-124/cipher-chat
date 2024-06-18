@@ -15,12 +15,6 @@ const generateKey = () => {
 
 const encrypt = (data, aesKey) => {
   try {
-    // console.log(
-    //   'AES KEY | TYPE | LENGTH: ',
-    //   aesKey,
-    //   typeof aesKey,
-    //   aesKey.length,
-    // );
     return CryptoJS.AES.encrypt(data, aesKey).toString();
   } catch (error) {
     console.log('AES-Encryption Failed: ', error);
@@ -30,15 +24,7 @@ const encrypt = (data, aesKey) => {
 
 const decrypt = (ciphertext, aesKey) => {
   try {
-    // console.log(
-    //   'AES KEY | TYPE | LENGTH: ',
-    //   aesKey,
-    //   typeof aesKey,
-    //   aesKey.length,
-    // );
     const bytes = CryptoJS.AES.decrypt(ciphertext, aesKey);
-    const test = bytes.toString(CryptoJS.enc.Utf8);
-    console.log({test});
     return bytes.toString(CryptoJS.enc.Utf8);
   } catch (error) {
     console.log('AES-Decryption Failed: ', error);

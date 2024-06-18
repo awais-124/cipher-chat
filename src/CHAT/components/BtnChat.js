@@ -19,11 +19,12 @@ export default BtnChat;
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: COLORS.primary.orange,
+    backgroundColor: COLORS.primary.blue,
     borderRadius: 10,
     padding: 16,
     alignItems: 'center',
     marginBottom: 16,
+    height: 60,
   },
   buttonText: {
     ...FONTFAMILY.COMFORTAA.b.pt14,

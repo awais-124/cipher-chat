@@ -35,6 +35,13 @@ const Message = ({navigation}) => {
   const receiverName = route.params?.receiver.name;
   const publicKey = route.params?.receiver.publicKey;
 
+  // const {
+  //   params: {
+  //     id: senderId,
+  //     receiver: {userId: receiverId, name: receiverName, publicKey} = {},
+  //   } = {},
+  // } = useRoute();
+
   useEffect(() => {
     const getMyPrivateKey = async () => {
       const temp = await StorageService.getItem('KEYS');
@@ -102,7 +109,11 @@ const Message = ({navigation}) => {
         });
 
         await Promise.all(newMessagesPromises);
-        setMessages(Array.from(messageMap.values()));
+        const sortedMessages = Array.from(messageMap.values()).sort(
+          (a, b) => b.createdAt - a.createdAt,
+        );
+        setMessages(sortedMessages);
+        // setMessages(Array.from(messageMap.values()));
         setLoading(false);
       });
 

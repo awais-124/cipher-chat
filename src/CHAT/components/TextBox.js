@@ -26,8 +26,8 @@ const styles = StyleSheet.create({
   },
   heading: {
     ...FONTFAMILY.MONTSERRAT.sb.pt18,
-    color: COLORS.secondary.black,
-    textTransform: 'uppercase',
+    color: COLORS.secondary.greyDark,
+    textTransform: 'capitalize',
     marginBottom: 20,
   },
   messageText: {

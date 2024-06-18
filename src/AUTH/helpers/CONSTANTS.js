@@ -160,18 +160,72 @@ const ModalMessage = {
  ];
 
 
- const sortMessagesByDate = messages => {
-   return messages.sort((a, b) => new Date(b.date) - new Date(a.date));
- };
+ const sortMessagesByDate = messages =>
+   messages.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-const CONSTANTS = {
-  SPLASH_TIMEOUT,
-  sortMessagesByDate,
-  emailRegex,
-  ModalMessage,
-  signUpData,
-  sentMessages,
-  receivedMessages
-};
+ function convertTimestampToDate(timestamp) {
+   try {
+     const date = new Date(
+       timestamp.seconds * 1000 + Math.floor(timestamp.nanoseconds / 1000000),
+     );
+
+     // Arrays with month names and day names
+     const monthNames = [
+       'Jan',
+       'Feb',
+       'Mar',
+       'Apr',
+       'May',
+       'Jun',
+       'Jul',
+       'Aug',
+       'Sep',
+       'Oct',
+       'Nov',
+       'Dec',
+     ];
+     const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+     // Format the date components
+     const hours = date.getHours();
+     const minutes = date.getMinutes();
+     const period = hours >= 12 ? 'PM' : 'AM';
+     const formattedHours = hours % 12 || 12; // Convert hours to 12-hour format
+     const formattedMinutes = minutes.toString().padStart(2, '0');
+     const day = dayNames[date.getDay()]; // Get day name from array
+     const month = monthNames[date.getMonth()]; // Get month name from array
+     const dayOfMonth = date.getDate();
+     const year = date.getFullYear();
+
+     // Log each component
+     //  console.log('Hours:', hours);
+     //  console.log('Minutes:', minutes);
+     //  console.log('Period:', period);
+     //  console.log('Formatted Hours:', formattedHours);
+     //  console.log('Formatted Minutes:', formattedMinutes);
+     //  console.log('Day:', day);
+     //  console.log('Month:', month);
+     //  console.log('Day of Month:', dayOfMonth);
+     //  console.log('Year:', year);
+
+     // Construct the formatted string
+     const formattedDate = `${formattedHours}:${formattedMinutes} ${period} ${day} ${month} ${dayOfMonth}, ${year}`;
+     return formattedDate;
+   } catch (error) {
+     console.error('Error converting timestamp to date:', error);
+     return new Date().toDateString(); // Fallback to current date string
+   }
+ }
+
+ const CONSTANTS = {
+   convertTimestampToDate,
+   SPLASH_TIMEOUT,
+   sortMessagesByDate,
+   emailRegex,
+   ModalMessage,
+   signUpData,
+   sentMessages,
+   receivedMessages,
+ };
 
 export default CONSTANTS;

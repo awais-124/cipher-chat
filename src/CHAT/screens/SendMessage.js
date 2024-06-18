@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, ScrollView} from 'react-native';
+import {StyleSheet, ScrollView, View, Keyboard, Alert} from 'react-native';
 
 import firestore from '@react-native-firebase/firestore';
+import uuid from 'react-native-uuid';
 
 import StyledInput from '../components/StyledInput';
 import SmallLoader from '../components/SmallLoader';
@@ -17,8 +18,8 @@ const SendMessage = ({navigation, route}) => {
   const ids = route.params.ids;
   const sender = ids.senderId;
   const receiver = ids.receiverId;
+  const sendingId = `${sender}_${receiver}`;
 
-  console.log({receiver, sender});
   const [message, setMessage] = useState('');
   const [messageTwo, setMessageTwo] = useState('');
   const [encryptedMessage, setEncryptedMessage] = useState('');
@@ -38,17 +39,50 @@ const SendMessage = ({navigation, route}) => {
       console.log(receiverKeys.publicKey);
     };
     fetchReceiverKeys();
+
+    const tempkey = 'abfb414de2b837e6142f20924c47be80';
+    const tempmsg = 'U2FsdGVkX1/skCruBlGsqENU45MYzpisiIhtpkP3xxs=';
+    console.log('TESTING AES MSLA  :  ', AES.decrypt(tempmsg, tempkey));
   }, []);
 
-  const handleSend = () => {
-    // Logic for sending message to Firestore will be added later
+  const handleSend = async () => {
+    const uniqueId = uuid.v4();
+    const myMsg = {
+      _id: uniqueId,
+      text: encryptedMessage,
+      createdAt: new Date(),
+      metadata: {key: encryptedAesKey},
+    };
+
+    try {
+      await firestore()
+        .collection('encryption')
+        .doc(sendingId)
+        .collection('messages')
+        .add(myMsg);
+
+      setAesKey('');
+      setEncryptedAesKey('');
+      setMessage('');
+      setEncryptedMessage('');
+      setMessageTwo('');
+      const backToEncryption = () => navigation.goBack();
+      Alert.alert('Success', 'Message sent successfully!', [
+        {text: 'OK', onPress: backToEncryption},
+      ]);
+    } catch (error) {
+      console.log('ERROR while sending from SENDMESSAGE : ', error);
+      Alert.alert('Message not sent', 'Something went wrong!');
+    }
   };
 
   const handleEncrypt = () => {
     // Logic for AES encryption will be added later
     setEncryptedAesKey('');
     const aesKeyTemp = AES.generateKey();
-    const encryptedMessageTemp = AES.encrypt(message, aesKeyTemp);
+    console.log({messageTwo, aesKeyTemp});
+    const encryptedMessageTemp = AES.encrypt(messageTwo, aesKeyTemp);
+    console.log({encryptedMessageTemp});
     setAesKey(aesKeyTemp);
     setEncryptedMessage(encryptedMessageTemp);
   };
@@ -56,8 +90,8 @@ const SendMessage = ({navigation, route}) => {
   const handleEncryptKey = async () => {
     // Logic for encrypting AES key with receiver's public key will be added later
     setLoading(true);
-    const encryptedAesKeyTemp = await algoRSA.encryptMessage(
-      [receiverPublicKey],
+    const encryptedAesKeyTemp = await algoRSA.encryptSingle(
+      receiverPublicKey,
       aesKey,
     );
     setEncryptedAesKey(encryptedAesKeyTemp);
@@ -65,6 +99,7 @@ const SendMessage = ({navigation, route}) => {
   };
 
   const handleSubmitMessage = () => {
+    Keyboard.dismiss();
     if (!message.length) return;
     setAesKey('');
     setEncryptedMessage('');
@@ -74,58 +109,86 @@ const SendMessage = ({navigation, route}) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <StyledInput
-        message={message}
-        setter={setMessage}
-        handler={handleSubmitMessage}
-      />
-      {messageTwo ? (
-        <>
-          <TextBox text={messageTwo} heading="Message" />
-          <BtnChat
-            title="Encrypt"
-            handler={handleEncrypt}
-            disabled={!messageTwo || loading}
-          />
-        </>
-      ) : null}
-      {encryptedMessage ? (
-        <>
-          <TextBox heading={`Encrypted Message`} text={`${encryptedMessage}`} />
-          <TextBox heading={`AES Key`} text={`${aesKey}`} />
-          <BtnChat
-            title="Encrypt AES Key"
-            handler={handleEncryptKey}
-            disabled={!messageTwo || loading}
-          />
-        </>
-      ) : null}
-      {encryptedAesKey && !loading && (
-        <>
-          <TextBox heading={`Encrypted Aes Key`} text={`${encryptedAesKey}`} />
-          <TextBox
-            text={`${receiverPublicKey}`}
-            heading={`Receiver's Public Key`}
-          />
-          <BtnChat
-            title="Send"
-            handler={handleEncryptKey}
-            disabled={!messageTwo || loading}
-          />
-        </>
-      )}
-      {loading && <SmallLoader />}
-    </ScrollView>
+    <View style={styles.outerContainer}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {messageTwo ? (
+          <>
+            <TextBox text={messageTwo} heading="Message" />
+            <BtnChat
+              title="Encrypt"
+              handler={handleEncrypt}
+              disabled={!messageTwo || loading}
+            />
+          </>
+        ) : null}
+        {encryptedMessage ? (
+          <>
+            <TextBox
+              heading={`Encrypted Message`}
+              text={`${encryptedMessage}`}
+            />
+            <TextBox heading={`AES Key`} text={`${aesKey}`} />
+            <BtnChat
+              title="Encrypt AES Key"
+              handler={handleEncryptKey}
+              disabled={!messageTwo || loading}
+            />
+          </>
+        ) : null}
+        {encryptedAesKey && !loading && (
+          <>
+            <TextBox
+              heading={`Encrypted Aes Key`}
+              text={`${encryptedAesKey}`}
+            />
+            <TextBox
+              text={`${receiverPublicKey}`}
+              heading={`Receiver's Public Key`}
+            />
+            <BtnChat
+              title="Send"
+              handler={handleSend}
+              disabled={!messageTwo || loading}
+            />
+          </>
+        )}
+        {loading && <SmallLoader />}
+      </ScrollView>
+      <View style={styles.inputWrapper}>
+        <StyledInput
+          message={message}
+          setter={setMessage}
+          handler={handleSubmitMessage}
+        />
+      </View>
+    </View>
   );
 };
 
 export default SendMessage;
 
 const styles = StyleSheet.create({
+  outerContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.secondary.white,
+  },
   container: {
     flexGrow: 1,
-    padding: 16,
-    backgroundColor: COLORS.secondary.black,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 90,
+  },
+  inputWrapper: {
+    backgroundColor: COLORS.secondary.white,
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    elevation: 5, // For Android shadow
+    zIndex: 10,
   },
 });
+

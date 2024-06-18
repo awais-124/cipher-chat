@@ -6,8 +6,8 @@ import SignIn from '../AUTH/screens/SignIn';
 import SignUp from '../AUTH/screens/SignUp';
 import ForgotPass from '../AUTH/screens/ForgotPass';
 import ResetPass from '../AUTH/screens/ResetPass';
-import Message from '../CHAT/screens/Message';
 
+import Message from '../CHAT/screens/Message';
 import Chat from '../CHAT/screens/Chat';
 import Contact from '../CHAT/screens/Contact';
 import SecurityKeys from '../CHAT/screens/SecurityKeys';
@@ -15,6 +15,7 @@ import Update from '../CHAT/screens/Update';
 import Users from '../CHAT/screens/Users';
 import Encryption from '../CHAT/screens/Encryption';
 import SendMessage from '../CHAT/screens/SendMessage';
+import DecryptMessage from '../CHAT/screens/DecryptMessage';
 
 const Stack = createNativeStackNavigator();
 
@@ -37,6 +38,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Users" component={Users} />
         <Stack.Screen name="Encryption" component={Encryption} />
         <Stack.Screen name="SendMessage" component={SendMessage} />
+        <Stack.Screen name="DecryptMessage" component={DecryptMessage} />
       </Stack.Navigator>
     </NavigationContainer>
   );

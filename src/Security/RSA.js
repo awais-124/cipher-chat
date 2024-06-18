@@ -17,20 +17,6 @@ async function generateKeyPair() {
 
 async function encryptMessage(publicKeys, message) {
   try {
-    // console.log(
-    //   'PLAIN TEXT IN RSA | TYPE | LENGTH | KEY | KEY-LENGTH: ',
-    //   message,
-    //   '  |  ',
-    //   typeof message,
-    //   '  |  ',
-    //   message.length,
-    //   '  |  ',
-    //   typeof key,
-    //   '  |  ',
-    //   key,
-    //   '  |  ',
-    //   key.length,
-    // );
     const encryptedMessage = await Promise.all(
       publicKeys.map(publicKey => {
         return RSA.encrypt(message, publicKey);
@@ -44,20 +30,6 @@ async function encryptMessage(publicKeys, message) {
 }
 
 async function decryptMessage(privateKey, messages) {
-  console.log(
-    'CIPHER TEXT IN RSA | TYPE | LENGTH | KEY | KEY-LENGTH: ',
-    messages[0],
-    '  |  ',
-    typeof messages[0],
-    '  |  ',
-    messages[0].length,
-    '  |  ',
-    typeof privateKey,
-    '  |  ',
-    privateKey,
-    '  |  ',
-    privateKey.length,
-  );
   for (const msg of messages) {
     try {
       const decryptedMessage = await RSA.decrypt(msg, privateKey);
@@ -71,8 +43,32 @@ async function decryptMessage(privateKey, messages) {
   return false;
 }
 
+async function encryptSingle(pbl, msg) {
+  try {
+    const cipher = RSA.encrypt(msg, pbl);
+    return cipher;
+  } catch (error) {
+    console.log('RSA ENCRYPTION ERROR : ', {error});
+    return false;
+  }
+}
 
+async function decryptSingle(prv, msg) {
+  try {
+    const plain = RSA.decrypt(msg, prv);
+    return plain;
+  } catch (error) {
+    console.log('RSA DECRYPTION ERROR : ', {error});
+    return false;
+  }
+}
 
-const algoRSA = {generateKeyPair, encryptMessage, decryptMessage};
+const algoRSA = {
+  generateKeyPair,
+  encryptMessage,
+  decryptMessage,
+  encryptSingle,
+  decryptSingle,
+};
 
 export default algoRSA;

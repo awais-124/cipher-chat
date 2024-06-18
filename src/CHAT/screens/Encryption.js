@@ -8,6 +8,9 @@ import {
   View,
   Image,
 } from 'react-native';
+
+import firestore from '@react-native-firebase/firestore';
+
 import COLORS from '../../AUTH/styles/colors';
 import CONSTANTS from '../../AUTH/helpers/CONSTANTS';
 import FONTFAMILY from '../../AUTH/styles/fonts';
@@ -19,16 +22,72 @@ const Encryption = ({navigation, route}) => {
   const ids = route.params.ids;
   const sender = ids.senderId;
   const receiver = ids.receiverId;
+  const sendingId = `${sender}_${receiver}`;
+  const receivingId = `${receiver}_${sender}`;
 
-  const [tab, setTab] = useState(0);
-  const [receivedMessages, setReceivedMessages] = useState(
-    CONSTANTS.receivedMessages,
-  );
-  const [sentMessages, setSentMessages] = useState(CONSTANTS.sentMessages);
+  const [tab, setTab] = useState(1);
+  const [receivedMessages, setReceivedMessages] = useState([]);
+  const [sentMessages, setSentMessages] = useState([]);
 
+  const goToDecryptMessageScreen = (msg, key) => {
+    console.log({msg, key});
+    const msgData = {
+      encryptedMessage: msg,
+      encryptedAesKey: key,
+    };
+    navigation.navigate('DecryptMessage', {data: msgData});
+  };
+
+  // getting sent messages
   useEffect(() => {
-    setReceivedMessages(CONSTANTS.sortMessagesByDate(receivedMessages));
-    setSentMessages(CONSTANTS.sortMessagesByDate(sentMessages));
+    const fetchMessages = async () => {
+      try {
+        const subscriber = firestore()
+          .collection('encryption')
+          .doc(sendingId)
+          .collection('messages')
+          .orderBy('createdAt', 'desc')
+          .onSnapshot(querySnapshot => {
+            const fetchedMessages = [];
+            querySnapshot.forEach(doc => {
+              fetchedMessages.push(doc.data());
+            });
+            // console.log('Fetched messages:', fetchedMessages);
+            setSentMessages(fetchedMessages);
+          });
+        return subscriber;
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    fetchMessages();
+  }, []);
+
+  //getting inbox messages
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const subscriber = firestore()
+          .collection('encryption')
+          .doc(receivingId)
+          .collection('messages')
+          .orderBy('createdAt', 'desc')
+          .onSnapshot(querySnapshot => {
+            const fetchedMessages = [];
+            querySnapshot.forEach(doc => {
+              fetchedMessages.push(doc.data());
+            });
+            // console.log('Fetched messages:', fetchedMessages);
+            setReceivedMessages(fetchedMessages);
+          });
+        return subscriber;
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    fetchMessages();
   }, []);
 
   const Tab = ({title, onClick, tip}) => (
@@ -50,10 +109,30 @@ const Encryption = ({navigation, route}) => {
     navigation.navigate('SendMessage', {ids: data});
   };
 
-  const renderMessageItem = ({item}) => (
+  const renderInboxMessageItem = ({item}) => (
+    <TouchableWithoutFeedback
+      onPress={() => goToDecryptMessageScreen(item.text, item.metadata.key)}>
+      <View style={styles.messageItem}>
+        <Text style={styles.messageText}>{item.text.substring(0, 30)}...</Text>
+        <Text style={styles.messageDate}>
+          {CONSTANTS.convertTimestampToDate(item.createdAt)}
+        </Text>
+      </View>
+    </TouchableWithoutFeedback>
+  );
+
+  const renderSentMessageItem = ({item}) => (
     <View style={styles.messageItem}>
       <Text style={styles.messageText}>{item.text.substring(0, 30)}...</Text>
-      <Text style={styles.messageDate}>{item.date}</Text>
+      <Text style={styles.messageDate}>
+        {CONSTANTS.convertTimestampToDate(item.createdAt)}
+      </Text>
+    </View>
+  );
+
+  const renderEmpty = () => (
+    <View style={styles.emptyBox}>
+      <Text style={styles.noMessagesText}>{`No messages yet`}</Text>
     </View>
   );
 
@@ -69,15 +148,17 @@ const Encryption = ({navigation, route}) => {
       {tab === 1 ? (
         <FlatList
           data={receivedMessages}
-          renderItem={renderMessageItem}
-          keyExtractor={item => item.id}
+          renderItem={renderInboxMessageItem}
+          keyExtractor={item => item._id}
+          ListEmptyComponent={renderEmpty}
         />
       ) : (
         <View style={{flex: 1}}>
           <FlatList
             data={sentMessages}
-            renderItem={renderMessageItem}
-            keyExtractor={item => item.id}
+            renderItem={renderSentMessageItem}
+            keyExtractor={item => item._id}
+            ListEmptyComponent={renderEmpty}
           />
           <TouchableOpacity style={styles.fab} onPress={navigateToSendMessage}>
             <View style={styles.fabIcon}>
@@ -168,4 +249,11 @@ const styles = StyleSheet.create({
   plus: {
     tintColor: COLORS.secondary.white,
   },
+  noMessagesText: {
+    ...FONTFAMILY.MONTSERRAT.reg.pt16,
+    color: COLORS.secondary.black,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  emptyBox: {},
 });
