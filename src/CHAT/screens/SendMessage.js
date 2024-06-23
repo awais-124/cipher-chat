@@ -39,10 +39,6 @@ const SendMessage = ({navigation, route}) => {
       console.log(receiverKeys.publicKey);
     };
     fetchReceiverKeys();
-
-    const tempkey = 'abfb414de2b837e6142f20924c47be80';
-    const tempmsg = 'U2FsdGVkX1/skCruBlGsqENU45MYzpisiIhtpkP3xxs=';
-    console.log('TESTING AES MSLA  :  ', AES.decrypt(tempmsg, tempkey));
   }, []);
 
   const handleSend = async () => {

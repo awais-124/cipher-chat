@@ -8,7 +8,8 @@ import {
   Alert,
 } from 'react-native';
 
-import {GiftedChat, Bubble} from 'react-native-gifted-chat';
+import {GiftedChat, Bubble, InputToolbar, Send} from 'react-native-gifted-chat';
+
 import {useRoute} from '@react-navigation/native';
 import firestore from '@react-native-firebase/firestore';
 
@@ -113,7 +114,6 @@ const Message = ({navigation}) => {
           (a, b) => b.createdAt - a.createdAt,
         );
         setMessages(sortedMessages);
-        // setMessages(Array.from(messageMap.values()));
         setLoading(false);
       });
 

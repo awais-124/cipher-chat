@@ -22,6 +22,8 @@ const Encryption = ({navigation, route}) => {
   const ids = route.params.ids;
   const sender = ids.senderId;
   const receiver = ids.receiverId;
+  const username = ids?.contactName;
+
   const sendingId = `${sender}_${receiver}`;
   const receivingId = `${receiver}_${sender}`;
 
@@ -29,11 +31,13 @@ const Encryption = ({navigation, route}) => {
   const [receivedMessages, setReceivedMessages] = useState([]);
   const [sentMessages, setSentMessages] = useState([]);
 
-  const goToDecryptMessageScreen = (msg, key) => {
+  const goToDecryptMessageScreen = (msg, key, createdAt, username) => {
     console.log({msg, key});
     const msgData = {
       encryptedMessage: msg,
       encryptedAesKey: key,
+      date: createdAt,
+      user: username,
     };
     navigation.navigate('DecryptMessage', {data: msgData});
   };
@@ -111,7 +115,14 @@ const Encryption = ({navigation, route}) => {
 
   const renderInboxMessageItem = ({item}) => (
     <TouchableWithoutFeedback
-      onPress={() => goToDecryptMessageScreen(item.text, item.metadata.key)}>
+      onPress={() =>
+        goToDecryptMessageScreen(
+          item.text,
+          item.metadata.key,
+          item.createdAt,
+          username,
+        )
+      }>
       <View style={styles.messageItem}>
         <Text style={styles.messageText}>{item.text.substring(0, 30)}...</Text>
         <Text style={styles.messageDate}>
@@ -139,7 +150,7 @@ const Encryption = ({navigation, route}) => {
   return (
     <View style={styles.container}>
       <View style={styles.user}>
-        <Text style={styles.username}>USERNAME</Text>
+        <Text style={styles.username}>{`${username.toUpperCase()}`}</Text>
       </View>
       <View style={styles.tabs}>
         <Tab title="INBOX" onClick={() => toggleTab(1)} tip={1} />

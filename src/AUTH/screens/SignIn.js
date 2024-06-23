@@ -33,8 +33,8 @@ const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
 const {primary: p, secondary: s} = COLORS;
 
 const Home = ({navigation}) => {
-  const [email, setEmail] = useState('awais@gmail.com');
-  const [password, setPassword] = useState('221093');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [visible, setVisible] = useState(false);
   const {navigate} = navigation;
 
@@ -128,8 +128,8 @@ const Home = ({navigation}) => {
       public: publicKey,
     };
     await StorageService.saveItem('KEYS', JSON.stringify(Keys));
-    await navigation.pop(2);
-    await navigation.navigate('Chat');
+    // await navigation.pop(1);
+    await navigation.replace('Chat');
   };
 
   return (

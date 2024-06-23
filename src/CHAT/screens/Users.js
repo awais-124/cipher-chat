@@ -31,6 +31,7 @@ const Users = () => {
     const data = {
       receiverId: item.userId,
       senderId: id,
+      contactName: item.name,
     };
     navigation.navigate('Encryption', {ids: data});
   };
