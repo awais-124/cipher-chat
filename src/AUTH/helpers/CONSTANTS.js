@@ -217,7 +217,21 @@ const ModalMessage = {
    }
  }
 
+
+ const obfuscateKey = key => {
+   const visibleChars = 70;
+   if (key.length > visibleChars * 2) {
+     const start = key.slice(0, visibleChars);
+     const end = key.slice(-visibleChars);
+     const obfuscatedLength = key.length - visibleChars * 2;
+     const obfuscated = '***'.padEnd(obfuscatedLength + 3, '*');
+     return `${start}${obfuscated}${end}`;
+   }
+   return key;
+ };
+
  const CONSTANTS = {
+   obfuscateKey,
    convertTimestampToDate,
    SPLASH_TIMEOUT,
    sortMessagesByDate,

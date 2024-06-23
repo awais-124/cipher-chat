@@ -1,10 +1,4 @@
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import COLORS from '../../AUTH/styles/colors';
 import {screen_width} from '../../AUTH/utils/Dimensions';
@@ -12,12 +6,12 @@ import FONTFAMILY from '../../AUTH/styles/fonts';
 
 const Cards = ({onClick, label, icon}) => {
   return (
-    <TouchableWithoutFeedback onPress={onClick}>
+    <TouchableOpacity onPress={onClick}>
       <View style={styles.box}>
         <Image source={icon} />
         <Text style={styles.label}>{label}</Text>
       </View>
-    </TouchableWithoutFeedback>
+    </TouchableOpacity>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, ScrollView, View} from 'react-native';
+import {StyleSheet, ScrollView, View, Text} from 'react-native';
 
 import BtnChat from '../components/BtnChat';
 import TextBox from '../components/TextBox';
@@ -9,11 +9,14 @@ import algoRSA from '../../Security/RSA';
 import AES from '../../Security/AES';
 
 import COLORS from '../../AUTH/styles/colors';
+import CONSTANTS from '../../AUTH/helpers/CONSTANTS';
+import FONTFAMILY from '../../AUTH/styles/fonts';
 
+import {screen_width} from '../../AUTH/utils/Dimensions';
 import StorageService from '../../AUTH/utils/StorageHelper';
 
 const DecryptMessage = ({navigation, route}) => {
-  const {encryptedMessage, encryptedAesKey} = route?.params?.data;
+  const {encryptedMessage, encryptedAesKey, date, user} = route?.params?.data;
 
   const [aesKey, setAesKey] = useState('');
   const [decryptedMessage, setDecryptedMessage] = useState('');
@@ -56,22 +59,7 @@ const DecryptMessage = ({navigation, route}) => {
 
   const handleDecryptMessage = () => {
     try {
-      console.log(
-        '  ******************************  ',
-        {
-          encryptedMessage,
-          aesKey,
-        },
-        '  ******************************  ',
-      );
       const decryptedMessageTemp = AES.decrypt(encryptedMessage, aesKey);
-      console.log(
-        '  ******************************  ',
-        {
-          decryptedMessageTemp,
-        },
-        '  ******************************  ',
-      );
       setDecryptedMessage(decryptedMessageTemp);
       setMessageDecrypted(true);
     } catch (error) {
@@ -83,6 +71,14 @@ const DecryptMessage = ({navigation, route}) => {
 
   return (
     <View style={styles.outerContainer}>
+      <View style={styles.user}>
+        <Text
+          style={
+            styles.title
+          }>{`Received from ${user} at ${CONSTANTS.convertTimestampToDate(
+          date,
+        )}`}</Text>
+      </View>
       <ScrollView contentContainerStyle={styles.container}>
         <TextBox heading="Encrypted Message" text={encryptedMessage} />
         <TextBox heading="Encrypted AES Key" text={encryptedAesKey} />
@@ -94,7 +90,10 @@ const DecryptMessage = ({navigation, route}) => {
         {aesKeyDecrypted && (
           <>
             <TextBox heading="Decrypted AES Key" text={aesKey} />
-            <TextBox heading="Private Key" text={prvKey} />
+            <TextBox
+              heading="Private Key"
+              text={CONSTANTS.obfuscateKey(prvKey)}
+            />
             <BtnChat
               title="Decrypt Message"
               handler={handleDecryptMessage}
@@ -126,5 +125,19 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 16,
     paddingVertical: 26,
+  },
+  user: {
+    width: screen_width,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.primary.blue,
+    gap: 10,
+    paddingHorizontal: 20,
+  },
+  title: {
+    color: COLORS.secondary.white,
+    ...FONTFAMILY.MONTSERRAT.reg.pt14,
+    textAlign: 'center',
   },
 });

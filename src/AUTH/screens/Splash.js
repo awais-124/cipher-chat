@@ -21,7 +21,7 @@ const Splash = ({navigation}) => {
   const checkLogin = async () => {
     const email = await StorageService.getItem('EMAIL');
     console.log('EMAIL FROM SPLASH: ', email);
-    await navigation.navigate(
+    await navigation.replace(
       `${typeof email === 'string' ? 'Chat' : 'SignIn'}`,
     );
   };

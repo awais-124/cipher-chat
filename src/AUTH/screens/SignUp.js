@@ -37,11 +37,11 @@ const {COMFORTAA: com, MONTSERRAT: mon, POPPINS: pop} = FONTFAMILY;
 const {secondary: s, primary: p} = COLORS;
 
 const SignUp = ({navigation}) => {
-  const [name, setName] = useState('Ali');
-  const [email, setEmail] = useState('alimalik@gmail.com');
-  const [phone, setPhone] = useState('03269872800');
-  const [pass, setPass] = useState('221094');
-  const [confirmPass, setConfirmPass] = useState('221094');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [pass, setPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
 
   const [date, setDate] = useState(null);
   const [open, setOpen] = useState(false);
